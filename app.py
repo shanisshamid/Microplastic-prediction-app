@@ -2,105 +2,69 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import numpy as np
+import numpy as np # Needed for potential array handling
 
-# --- 1. Configuration & Styling (KEEPING THE BACKGROUND IMAGE) ---
-
-# Raw link for the background image
-RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper.jpg"
-
-def set_background(image_url):
-    """Injects custom CSS to set the background image."""
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url({image_url});
-            background-size: cover;          
-            background-repeat: no-repeat;    
-            background-attachment: fixed;    
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-set_background(RAW_LINK) # Apply the background immediately
-st.set_page_config(layout="wide") 
-
-
-# --- 2. Load Assets and Define Features ---
-
-# Feature names MUST match the exact order your model was trained on!
-FINAL_FEATURE_NAMES = ['Temperature (°C)', 'pH', 'DO(mg/L)', 'CDC(µs/cm)', 'Turbidity(NTUs)']
-
+# --- 1. Load the Champion Model and Scaler ---
 @st.cache_resource 
 def load_assets():
-    """Loads the trained model and scaler only once."""
+    # Ensure these files are in the same directory as app.py
     try:
         model = joblib.load('xgb_champion_model.joblib')
         scaler = joblib.load('scaler_for_prediction.joblib')
-        return model, scaler
+        # The feature names must be in the exact order used during training (Importance order is ignored here)
+        feature_names = ['Feature_A', 'Feature_B', 'Feature_C', 'pH', 'CDC(µs/cm)', 'Turbidity(NTUs)', 'DO(mg/L)', 'Temperature (°C)']
+        return model, scaler, feature_names
     except FileNotFoundError:
-        st.error("Model or Scaler files not found. Ensure 'xgb_champion_model.joblib' and 'scaler_for_prediction.joblib' are in the directory.")
-        return None, None
+        st.error("Model or Scaler files not found. Please ensure 'xgb_champion_model.joblib' and 'scaler_for_prediction.joblib' are in the directory.")
+        return None, None, None
 
-model, scaler = load_assets()
-
-# --- 3. Streamlit Interface (REVERTED TO WORKING LAYOUT) ---
+model, scaler, feature_names = load_assets()
 
 if model is not None:
     
     st.title("💧 Microplastic Concentration Predictor for Penang River")
     st.markdown("Enter sensor readings to get a prediction from the **Reliable XGBoost Champion Model**.")
 
-    # --- Input Form (Using simple st.form structure) ---
+    # --- 2. Input Form (Use your 5 most important features for simplicity) ---
     with st.form("prediction_form"):
-        st.header("🔬 Key Sensor Inputs")
+        st.header("Key Sensor Inputs")
         
-        # --- SIMPLE INPUTS (Vertical Stacked, the original working format) ---
+        # Use inputs based on your actual feature names, ensuring the order matches your full list (feature_names) 
+        # For simplicity, let's assume your original features were: Temp, pH, DO, CDC, Turbidity
+        
+        # NOTE: You MUST replace these placeholder feature names and input ranges
+        # with your actual features and realistic min/max values.
         
         # 1. Temperature (°C) - Low Importance
-        temp = st.number_input('Temperature (°C)', min_value=0.0, max_value=50.0, value=25.0, help="Lowest importance feature.")
+        temp = st.number_input('Temperature (°C)', min_value=0.0, max_value=100.0, value=25.0, help="Lowest importance feature.")
         # 2. pH - Medium Importance
         ph = st.number_input('pH', min_value=0.0, max_value=14.0, value=7.5, step=0.1)
         # 3. DO (mg/L) - Medium Importance
-        do = st.number_input('DO (mg/L)', min_value=0.0, max_value=20.0, value=8.0, step=0.1)
+        do = st.number_input('DO (mg/L)', min_value=0.0, max_value=100.0, value=8.0, step=0.1)
         # 4. CDC (µs/cm) - HIGHEST IMPORTANCE (77%)
-        cdc = st.number_input('CDC (µs/cm) - Conductivity (Critical)', min_value=0.0, max_value=1500.0, value=500.0, help="This is the most critical feature (77% importance).")
+        cdc = st.number_input('CDC (µs/cm) - Conductivity', min_value=0.0, max_value=100000.0, value=500.0, help="This is the most critical feature (77% importance).")
         # 5. Turbidity (NTUs) - High Importance
-        turbidity = st.number_input('Turbidity (NTUs)', min_value=0.0, max_value=100.0, value=10.0)
+        turbidity = st.number_input('Turbidity (NTUs)', min_value=0.0, max_value=10000.0, value=10.0)
         
-        st.markdown("---")
-        # Use st.form_submit_button inside the form
-        submitted = st.form_submit_button("🚀 Predict Microplastic Concentration", type="primary", use_container_width=True)
+        # Note: If you have other features ('Feature_A', 'Feature_B', etc.), you must add input boxes for them here.
+        # Ensure the order of variables matches your training data's feature order!
 
+        submitted = st.form_submit_button("Predict Microplastic Concentration")
 
-    # --- 4. Prediction Logic (Runs ONLY when submitted is True) ---
+    # --- 3. Prediction Logic ---
     if submitted:
+        # Create a single row DataFrame from user input (ORDER IS CRUCIAL!)
+        # Use only the values from the input fields in the exact order of your feature_names list
+        user_input = np.array([[temp, ph, do, cdc, turbidity]]) 
+        input_data = pd.DataFrame(user_input, columns=['Temperature (°C)', 'pH', 'DO(mg/L)', 'CDC(µs/cm)', 'Turbidity(NTUs)']) # Adjust columns as necessary
         
-        # 1. Collect inputs in the EXACT training order
-        user_input_values = [
-            temp,       # 1. Temperature (°C)
-            ph,         # 2. pH
-            do,         # 3. DO(mg/L)
-            cdc,        # 4. CDC(µs/cm)
-            turbidity   # 5. Turbidity(NTUs)
-        ]
-        
-        # 2. Create DataFrame
-        input_data = pd.DataFrame([user_input_values], columns=FINAL_FEATURE_NAMES)
-        
-        # 3. Scale the input data
+        # Scale the input data using the saved scaler
         scaled_input = scaler.transform(input_data)
         
-        # 4. Generate prediction
+        # Generate prediction
         prediction = model.predict(scaled_input)[0]
-
-        # 5. Display the result
-        st.markdown("<br>", unsafe_allow_html=True)
         
-        with st.success("✅ Prediction Result:"):
-            st.markdown(f"The estimated Microplastic concentration is:")
-            st.markdown(f"## **{prediction:,.2f} Particles/L**")
-            st.caption("Prediction is based on the robust XGBoost model (R²: 0.88).")
+        # Display Result
+        st.success("Prediction Complete! The estimated Microplastic concentration is:")
+        st.markdown(f"## **{prediction:,.2f} Particles/L**")
+        st.caption("Prediction is based on the robust XGBoost model.")
