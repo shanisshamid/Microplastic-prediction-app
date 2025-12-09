@@ -4,9 +4,9 @@ import joblib
 import pandas as pd
 import numpy as np
 
-# --- Configuration & Styling ---
+# --- 1. Configuration & Styling ---
 
-# 1. Raw link for the background image
+# Raw link for the background image (Corrected link for 'river wallpaper.jpg')
 RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper.jpg"
 
 def set_background(image_url):
@@ -54,11 +54,11 @@ if model is not None:
     st.title("💧 Microplastic Concentration Predictor for Penang River")
     st.markdown("---")
     
-    # Use a container for a clean, bordered form area
-    with st.container(border=True): 
+    # --- Input Form (Using st.form for reliable button submission) ---
+    with st.form("prediction_form"):
         st.header("🔬 Input Sensor Readings")
         
-        # --- Form Layout using Columns ---
+        # Form Layout using Columns
         col1, col2, col3 = st.columns(3)
         
         # Column 1: pH and Temperature
@@ -76,20 +76,21 @@ if model is not None:
             cdc = st.number_input('CDC (µs/cm) - Conductivity (Critical)', 
                                     min_value=0.0, max_value=1500.0, value=500.0, 
                                     help="This is the most critical feature (77% importance).")
-            # Button is placed outside columns for full width
-            st.markdown("###### ") # Space to align the button better
+            st.markdown("###### ") # Space
 
         st.markdown("---")
-        submitted = st.button("🚀 Predict Microplastic Concentration", type="primary", use_container_width=True)
+        # Use st.form_submit_button inside the form
+        submitted = st.form_submit_button("🚀 Predict Microplastic Concentration", type="primary", use_container_width=True)
 
 
-    # --- Prediction Logic ---
+    # --- Prediction Logic (Runs ONLY when submitted is True) ---
     if submitted:
         
         # 1. Collect inputs in the correct order
+        # Note: The order must match FINAL_FEATURE_NAMES
         user_input_values = [temp, ph, do, cdc, turbidity]
         
-        # 2. Create DataFrame using the FINAL_FEATURE_NAMES
+        # 2. Create DataFrame
         input_data = pd.DataFrame([user_input_values], columns=FINAL_FEATURE_NAMES)
         
         # 3. Scale the input data
