@@ -7,7 +7,7 @@ import numpy as np
 # --- 1. Styling Configuration (NEW) ---
 
 # Raw link for the background image
-RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper.jpg"
+RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper%203.jpg"
 
 def set_background(image_url):
     """Injects custom CSS to set the background image."""
@@ -47,7 +47,7 @@ model, scaler, feature_names = load_assets()
 if model is not None:
     
     st.title("💧 Microplastic Concentration Predictor for Penang River")
-    st.markdown("Enter sensor readings to get a prediction from the **Reliable XGBoost Champion Model**.")
+    st.markdown("Enter sensor readings to get a prediction from the **Reliable XGBoost Model**.")
 
     # --- 3. Input Form (ORIGINAL WORKING CODE STRUCTURE) ---
     with st.form("prediction_form"):
