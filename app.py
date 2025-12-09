@@ -7,7 +7,7 @@ import numpy as np
 # --- 1. Styling Configuration (NEW) ---
 
 # Raw link for the background image
-RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper%202.jpg"
+RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper.jpg"
 
 def set_background(image_url):
     """Injects custom CSS to set the background image."""
