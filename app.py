@@ -4,9 +4,9 @@ import joblib
 import pandas as pd
 import numpy as np
 
-# --- 1. Configuration & Styling ---
+# --- 1. Configuration & Styling (KEEPING THE BACKGROUND IMAGE) ---
 
-# Raw link for the background image (Corrected link for 'river wallpaper.jpg')
+# Raw link for the background image
 RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper.jpg"
 
 def set_background(image_url):
@@ -26,7 +26,7 @@ def set_background(image_url):
     )
 
 set_background(RAW_LINK) # Apply the background immediately
-st.set_page_config(layout="wide") # Use wide layout for better column spacing
+st.set_page_config(layout="wide") 
 
 
 # --- 2. Load Assets and Define Features ---
@@ -47,48 +47,46 @@ def load_assets():
 
 model, scaler = load_assets()
 
-# --- 3. Streamlit Interface and Prediction Logic ---
+# --- 3. Streamlit Interface (REVERTED TO WORKING LAYOUT) ---
 
 if model is not None:
     
     st.title("💧 Microplastic Concentration Predictor for Penang River")
-    st.markdown("---")
-    
-    # --- Input Form (Using st.form for reliable button submission) ---
+    st.markdown("Enter sensor readings to get a prediction from the **Reliable XGBoost Champion Model**.")
+
+    # --- Input Form (Using simple st.form structure) ---
     with st.form("prediction_form"):
-        st.header("🔬 Input Sensor Readings")
+        st.header("🔬 Key Sensor Inputs")
         
-        # Form Layout using Columns
-        col1, col2, col3 = st.columns(3)
+        # --- SIMPLE INPUTS (Vertical Stacked, the original working format) ---
         
-        # Column 1: pH and Temperature
-        with col1:
-            ph = st.number_input('pH', min_value=0.0, max_value=14.0, value=7.5, step=0.1)
-            temp = st.number_input('Temperature (°C)', min_value=0.0, max_value=50.0, value=25.0, help="Lowest importance feature.")
-
-        # Column 2: DO and Turbidity
-        with col2:
-            do = st.number_input('DO (mg/L)', min_value=0.0, max_value=20.0, value=8.0, step=0.1)
-            turbidity = st.number_input('Turbidity (NTUs)', min_value=0.0, max_value=100.0, value=10.0)
-
-        # Column 3: CDC (Critical Feature)
-        with col3:
-            cdc = st.number_input('CDC (µs/cm) - Conductivity (Critical)', 
-                                    min_value=0.0, max_value=1500.0, value=500.0, 
-                                    help="This is the most critical feature (77% importance).")
-            st.markdown("###### ") # Space
-
+        # 1. Temperature (°C) - Low Importance
+        temp = st.number_input('Temperature (°C)', min_value=0.0, max_value=50.0, value=25.0, help="Lowest importance feature.")
+        # 2. pH - Medium Importance
+        ph = st.number_input('pH', min_value=0.0, max_value=14.0, value=7.5, step=0.1)
+        # 3. DO (mg/L) - Medium Importance
+        do = st.number_input('DO (mg/L)', min_value=0.0, max_value=20.0, value=8.0, step=0.1)
+        # 4. CDC (µs/cm) - HIGHEST IMPORTANCE (77%)
+        cdc = st.number_input('CDC (µs/cm) - Conductivity (Critical)', min_value=0.0, max_value=1500.0, value=500.0, help="This is the most critical feature (77% importance).")
+        # 5. Turbidity (NTUs) - High Importance
+        turbidity = st.number_input('Turbidity (NTUs)', min_value=0.0, max_value=100.0, value=10.0)
+        
         st.markdown("---")
         # Use st.form_submit_button inside the form
         submitted = st.form_submit_button("🚀 Predict Microplastic Concentration", type="primary", use_container_width=True)
 
 
-    # --- Prediction Logic (Runs ONLY when submitted is True) ---
+    # --- 4. Prediction Logic (Runs ONLY when submitted is True) ---
     if submitted:
         
-        # 1. Collect inputs in the correct order
-        # Note: The order must match FINAL_FEATURE_NAMES
-        user_input_values = [temp, ph, do, cdc, turbidity]
+        # 1. Collect inputs in the EXACT training order
+        user_input_values = [
+            temp,       # 1. Temperature (°C)
+            ph,         # 2. pH
+            do,         # 3. DO(mg/L)
+            cdc,        # 4. CDC(µs/cm)
+            turbidity   # 5. Turbidity(NTUs)
+        ]
         
         # 2. Create DataFrame
         input_data = pd.DataFrame([user_input_values], columns=FINAL_FEATURE_NAMES)
