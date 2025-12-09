@@ -36,15 +36,15 @@ if model is not None:
         # with your actual features and realistic min/max values.
         
         # 1. Temperature (°C) - Low Importance
-        temp = st.number_input('Temperature (°C)', min_value=0.0, max_value=50.0, value=25.0, help="Lowest importance feature.")
+        temp = st.number_input('Temperature (°C)', min_value=0.0, max_value=100.0, value=25.0, help="Lowest importance feature.")
         # 2. pH - Medium Importance
         ph = st.number_input('pH', min_value=0.0, max_value=14.0, value=7.5, step=0.1)
         # 3. DO (mg/L) - Medium Importance
-        do = st.number_input('DO (mg/L)', min_value=0.0, max_value=20.0, value=8.0, step=0.1)
+        do = st.number_input('DO (mg/L)', min_value=0.0, max_value=100.0, value=8.0, step=0.1)
         # 4. CDC (µs/cm) - HIGHEST IMPORTANCE (77%)
-        cdc = st.number_input('CDC (µs/cm) - Conductivity', min_value=10.0, max_value=1500.0, value=500.0, help="This is the most critical feature (77% importance).")
+        cdc = st.number_input('CDC (µs/cm) - Conductivity', min_value=0.0, max_value=100000.0, value=500.0, help="This is the most critical feature (77% importance).")
         # 5. Turbidity (NTUs) - High Importance
-        turbidity = st.number_input('Turbidity (NTUs)', min_value=0.0, max_value=100.0, value=10.0)
+        turbidity = st.number_input('Turbidity (NTUs)', min_value=0.0, max_value=10000.0, value=10.0)
         
         # Note: If you have other features ('Feature_A', 'Feature_B', etc.), you must add input boxes for them here.
         # Ensure the order of variables matches your training data's feature order!
