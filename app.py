@@ -3,6 +3,8 @@ import joblib
 import pandas as pd
 import numpy as np
 
+st.write("🚀 App started successfully")
+
 # Page config FIRST
 st.set_page_config(page_title="MPs Prediction", layout="wide")
 
