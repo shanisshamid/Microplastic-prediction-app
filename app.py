@@ -7,8 +7,7 @@ import numpy as np
 st.set_page_config(page_title="MPs Prediction", layout="wide")
 
 # Background image
-RAW_LINK = "https://raw.githubusercontent.com/shanisshamid/Microplastic-prediction-app/main/river%20wallpaper%203.jpg"
-
+RAW_LINK = "https://github.com/shanisshamid/Microplastic-prediction-app/blob/e6c9808968290b026f2542605e5dc3877bdcd014/river_wallpaper_3.jpg"
 def set_background(image_url):
     st.markdown(
         f"""
