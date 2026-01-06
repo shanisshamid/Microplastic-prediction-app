@@ -1,59 +1,23 @@
 import streamlit as st
 import joblib
 import pandas as pd
-import numpy as np
 
-st.write("🚀 App started successfully")
-
-# Page config FIRST
-st.set_page_config(page_title="MPs Prediction", layout="wide")
-
-# Background image
-RAW_LINK = "https://github.com/shanisshamid/Microplastic-prediction-app/blob/e6c9808968290b026f2542605e5dc3877bdcd014/river_wallpaper_3.jpg"
-def set_background(image_url):
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url({image_url});
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-set_background(RAW_LINK)
+st.title("Microplastic Concentration Predictor (Penang Rivers)")
 
 # Load model and scaler
-@st.cache_resource
-def load_assets():
-    model = joblib.load("champion_gradientboost_model.pkl")
-    scaler = joblib.load("scaler_aug.pkl")
-    return model, scaler
+model = joblib.load("champion_gradientboost_model.pkl")
+scaler = joblib.load("scaler_aug.pkl")
 
-model, scaler = load_assets()
+st.subheader("Water Quality Inputs")
 
-# UI
-st.title("💧 Microplastic Concentration Predictor for Penang Rivers")
-st.markdown("Enter physicochemical water quality parameters to estimate **microplastic concentration (particles/L)**.")
+temp = st.number_input("Temperature (°C)", value=28.0)
+ph = st.number_input("pH", value=7.0)
+do = st.number_input("DO (mg/L)", value=6.5)
+cdc = st.number_input("CDC (µS/cm)", value=500.0)
+turb = st.number_input("Turbidity (NTU)", value=10.0)
 
-with st.form("prediction_form"):
-    st.header("Water Quality Inputs")
-
-    temp = st.number_input("Temperature (°C)", value=28.0)
-    ph = st.number_input("pH", value=7.0)
-    do = st.number_input("DO (mg/L)", value=6.5)
-    cdc = st.number_input("CDC (µS/cm)", value=500.0)
-    turb = st.number_input("Turbidity (NTUs)", value=15.0)
-
-    submitted = st.form_submit_button("Predict")
-
-if submitted:
-    # EXACT feature order used in training
-    input_df = pd.DataFrame(
+if st.button("Predict"):
+    X = pd.DataFrame(
         [[temp, ph, do, cdc, turb]],
         columns=[
             "Temperature (°C)",
@@ -64,11 +28,7 @@ if submitted:
         ]
     )
 
-    # Scale
-    scaled_input = scaler.transform(input_df)
+    X_scaled = scaler.transform(X)
+    pred = model.predict(X_scaled)[0]
 
-    # Predict
-    prediction = model.predict(scaled_input)[0]
-
-    st.success("Prediction Complete")
-    st.markdown(f"### **{prediction:,.2f} particles/L**")
+    st.success(f"Predicted Microplastic Concentration: {pred:.2f} particles/L")
