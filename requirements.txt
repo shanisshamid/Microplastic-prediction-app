@@ -1,6 +1,6 @@
-streamlit
-pandas
+streamlit==1.29.0
 numpy
-joblib
+pandas
 scikit-learn
+joblib
 xgboost
